@@ -4,7 +4,7 @@ A crate that dynamically captures the currently focused application on macOS, po
 
 ## 🤔 Why Frontmost
 
-One might assume that you could simply use the [`applications`](https://crates.io/crates/applications) crate by placing `ctx.get_frontmost_application().unwrap()` inside a loop and be done with it. However, this approach does not work as expected in practice.
+One might assume that you could simply use the [`applications`](https://crates.io/crates/applications) crate by placing `ctx.get_frontmost_application().unwrap()` inside a loop and call it a day. However, **this approach does not work as expected in practice**.
 
 Why? Because macOS uses an event-driven architecture, and a blocking loop prevents the main [`NSRunLoop`](https://developer.apple.com/documentation/Foundation/RunLoop?language=objc) from processing events. The [`NSRunLoop`](https://developer.apple.com/documentation/Foundation/RunLoop?language=objc) powers macOS's asynchronous notification system, so blocking it disrupts normal event handling.
 
