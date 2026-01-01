@@ -11,6 +11,8 @@ Why? Because macOS uses an event-driven architecture, and a blocking loop preven
 To work with this architecture, the code instead creates an observer (such as an NSWorkspace notification observer) that triggers when the user switches focus to a different application, specifically utilizing the `NSWorkspaceDidActivateApplicationNotification` notification. This allows your code to respond to application changes without blocking the run loop.
 
 ## 📖 How to Use
+Check [examples](https://github.com/kllarena07/frontmost/tree/main/examples) for an example of frontmost put into use.
+
 1. Bring the `frontmost` module and crate into scope
 ```
 mod frontmost;
