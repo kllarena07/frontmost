@@ -1,14 +1,8 @@
-# Frontmost App Detector for MacOS
+# Frontmost
+## ✍ About
+A crate that dynamically captures the currently focused application on macOS, powered by [`objc2`](https://docs.rs/objc2/latest/objc2/index.html), [`objc2_foundation`](https://docs.rs/objc2-foundation/latest/objc2_foundation/), and [`objc2_app_kit`](https://docs.rs/objc2-app-kit/0.3.1/objc2_app_kit/) Rust bindings.
 
-This repository hosts code that dynamically captures the currently focused application. Although it's plastered everywhere, I'll say it once again: **this works on MacOS only**.
-
-## Motivations
-
-I wrote this code for the purpose of integrating it into one of my other projects called [Discord RPC Everything](https://github.com/kllarena07/discord-rpc-everything) since I couldn't find anything else reliable online. So, I decided that I'd also share and open source it while I'm at it.
-
-This code was adapted from some Objective-C code that I generated using LLMs (since I have no experience using Objective-C) using [`objc2`](https://docs.rs/objc2/latest/objc2/index.html) Rust bindings. It also uses the [`objc2_foundation`](https://docs.rs/objc2-foundation/latest/objc2_foundation/) and [`objc2_app_kit`](https://docs.rs/objc2-app-kit/0.3.1/objc2_app_kit/) frameworks
-
-## Why You Can't Just Use the Applications Crate
+## 🤔 Why Frontmost
 
 One might assume that you could simply use the [`applications`](https://crates.io/crates/applications) crate by placing `ctx.get_frontmost_application().unwrap()` inside a loop and be done with it. However, this approach does not work as expected in practice.
 
@@ -16,11 +10,11 @@ Why? Because macOS uses an event-driven architecture, and a blocking loop preven
 
 To work with this architecture, the code instead creates an observer (such as an NSWorkspace notification observer) that triggers when the user switches focus to a different application, specifically utilizing the `NSWorkspaceDidActivateApplicationNotification` notification. This allows your code to respond to application changes without blocking the run loop.
 
-## How to Use
+## 📖 How to Use
 1. Bring the `frontmost` module and crate into scope
 ```
 mod frontmost;
-use frontmost::FrontmostAppDetector;
+use frontmost::Detector;
 ```
 2. Create the callback function that will be used when the observer detects that the user has changed apps
 ```
@@ -35,8 +29,14 @@ fn handle_app_change(ns_running_application: &NSRunningApplication) {
     }
 }
 ```
-3. Initialize a `FrontmostAppDetector` singleton by calling the `init` function and pass your callback function into it
+3. Initialize a `Detector` singleton by calling the `init` function and pass your callback function into it
 ```
-FrontmostAppDetector::init(handle_app_change);
+Detector::init(handle_app_change);
 ```
 5. Start the event loop using the `start_nsrunloop!()` macro
+
+## 👾 Bugs or vulnerabilities
+
+If you find any bugs or vulnerabilities, please contact me on my Twitter using the link below.
+
+_Made with ❤️ by [krayondev](https://x.com/krayondev)_
