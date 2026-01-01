@@ -18,10 +18,10 @@ macro_rules! start_nsrunloop {
     };
 }
 
-pub struct FrontmostAppDetector;
+pub struct Detector;
 
-impl FrontmostAppDetector {
-    // initialize FrontmostAppDetector object with the `init()` function by
+impl Detector {
+    // initialize Detector object with the `init()` function by
     // passing in the callback function that will be triggered upon switching the frontmost app
     pub fn init(callback: fn(&NSRunningApplication)) {
         static mut CALLBACK: Option<fn(&NSRunningApplication)> = None;

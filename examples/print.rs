@@ -1,6 +1,4 @@
-mod frontmost;
-
-use frontmost::FrontmostAppDetector;
+use frontmost::{Detector, start_nsrunloop};
 use objc2_app_kit::NSRunningApplication;
 
 fn main() {
@@ -13,7 +11,7 @@ fn main() {
         }
     }
 
-    FrontmostAppDetector::init(handle_app_change);
+    Detector::init(handle_app_change);
 
     println!("Monitoring application activations. Press Ctrl+C to stop.");
     start_nsrunloop!();
