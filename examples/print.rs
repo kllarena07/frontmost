@@ -1,13 +1,25 @@
-use frontmost::{start_nsrunloop, Detector};
-use objc2::rc::Retained;
-use objc2_foundation::NSString;
+use frontmost::{app::FrontmostApp, start_nsrunloop, Detector};
+
+#[derive(Debug)]
+struct App {
+    frontmost: String,
+}
+
+impl FrontmostApp for App {
+    fn set_frontmost(&mut self, new_value: &str) {
+        self.frontmost = new_value.to_string();
+    }
+    fn update(&self) {
+        println!("Application activated: {}", self.frontmost);
+    }
+}
 
 fn main() {
-    fn handle_app_change(frontmost_app: Retained<NSString>) {
-        println!("Application activated: {}", frontmost_app);
-    }
+    let my_app = App {
+        frontmost: String::new(),
+    };
 
-    Detector::init(handle_app_change);
+    Detector::init(Box::new(my_app));
 
     println!("Monitoring application activations. Press Ctrl+C to stop.");
     start_nsrunloop!();
