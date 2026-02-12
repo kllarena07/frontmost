@@ -13,29 +13,44 @@ To work with this architecture, the code instead creates an observer (such as an
 ## 📖 How to Use
 Check [examples](https://github.com/kllarena07/frontmost/tree/main/examples) for an example of frontmost put into use.
 
-1. Bring the `frontmost` module and crate into scope
+1. Bring the `frontmost` module and dependencies into scope
 ```
-mod frontmost;
-use frontmost::Detector;
+use frontmost::{Detector, start_nsrunloop};
+use objc2::rc::Retained;
+use objc2_foundation::NSString;
 ```
-2. Create the callback function that will be used when the observer detects that the user has changed apps
+2. Create the callback function that will be triggered when the user switches to a different application
 ```
-use objc2_app_kit::NSRunningApplication;
-
-fn handle_app_change(ns_running_application: &NSRunningApplication) {
-    unsafe {
-        let frontmost_app_name = ns_running_application
-            .localizedName()
-            .expect("Failed to capture application localizedName");
-        println!("Application activated: {}", frontmost_app_name);
-    }
+fn handle_app_change(frontmost_app: Retained<NSString>) {
+    println!("Application activated: {}", frontmost_app);
 }
 ```
 3. Initialize a `Detector` singleton by calling the `init` function and pass your callback function into it
 ```
 Detector::init(handle_app_change);
 ```
-5. Start the event loop using the `start_nsrunloop!()` macro
+4. Start the event loop using the `start_nsrunloop!()` macro
+```
+start_nsrunloop!();
+```
+
+### Complete Example
+```rust
+use frontmost::{Detector, start_nsrunloop};
+use objc2::rc::Retained;
+use objc2_foundation::NSString;
+
+fn main() {
+    fn handle_app_change(frontmost_app: Retained<NSString>) {
+        println!("Application activated: {}", frontmost_app);
+    }
+
+    Detector::init(handle_app_change);
+
+    println!("Monitoring application activations. Press Ctrl+C to stop.");
+    start_nsrunloop!();
+}
+```
 
 ## 👾 Bugs or vulnerabilities
 
