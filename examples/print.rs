@@ -1,14 +1,10 @@
-use frontmost::{Detector, start_nsrunloop};
-use objc2_app_kit::NSRunningApplication;
+use frontmost::{start_nsrunloop, Detector};
+use objc2::rc::Retained;
+use objc2_foundation::NSString;
 
 fn main() {
-    fn handle_app_change(ns_running_application: &NSRunningApplication) {
-        unsafe {
-            let frontmost_app_name = ns_running_application
-                .localizedName()
-                .expect("Failed to capture application localizedName");
-            println!("Application activated: {}", frontmost_app_name);
-        }
+    fn handle_app_change(frontmost_app: Retained<NSString>) {
+        println!("Application activated: {}", frontmost_app);
     }
 
     Detector::init(handle_app_change);
