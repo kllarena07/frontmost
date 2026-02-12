@@ -1,12 +1,13 @@
+use crate::app::FrontmostApp;
 use objc2::declare::ClassBuilder;
-use objc2::rc::Retained;
 use objc2::runtime::{NSObject, Sel};
 use objc2::{msg_send, sel, ClassType};
 use objc2_app_kit::{
     NSRunningApplication, NSWorkspace, NSWorkspaceApplicationKey,
     NSWorkspaceDidActivateApplicationNotification,
 };
-use objc2_foundation::{NSNotification, NSString};
+use objc2_foundation::NSNotification;
+use std::sync::{OnceLock, RwLock};
 
 #[macro_export]
 macro_rules! start_nsrunloop {
@@ -19,17 +20,15 @@ macro_rules! start_nsrunloop {
     };
 }
 
+static APP_INSTANCE: OnceLock<RwLock<Box<dyn FrontmostApp + Send + Sync>>> = OnceLock::new();
+
 pub struct Detector;
 
 impl Detector {
     // initialize Detector object with the `init()` function by
     // passing in the callback function that will be triggered upon switching the frontmost app
-    pub fn init(callback: fn(Retained<NSString>)) {
-        static mut CALLBACK: Option<fn(Retained<NSString>)> = None;
-        unsafe {
-            CALLBACK = Some(callback);
-        }
-
+    pub fn init(app: Box<dyn FrontmostApp + Send + Sync>) {
+        APP_INSTANCE.set(RwLock::new(app)).unwrap();
         // this is the Observer object that we'll be using
         // using ClassBuilder since I wasn't able to figure out
         // how to register external methods with the `define_class!` macro
@@ -60,8 +59,13 @@ impl Detector {
                 let frontmost_app_name = ns_running_app
                     .localizedName()
                     .expect("Failed to capture application localizedName");
-                if let Some(callback) = CALLBACK {
-                    callback(frontmost_app_name);
+                if let Some(app_ref) = APP_INSTANCE.get() {
+                    let app_name_str = frontmost_app_name.to_string();
+                    app_ref
+                        .write()
+                        .expect("Failed to write")
+                        .set_frontmost(&app_name_str);
+                    app_ref.read().expect("Failed to read").update();
                 }
             }
         }
