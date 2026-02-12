@@ -13,39 +13,67 @@ To work with this architecture, the code instead creates an observer (such as an
 ## 📖 How to Use
 Check [examples](https://github.com/kllarena07/frontmost/tree/main/examples) for an example of frontmost put into use.
 
-1. Bring the `frontmost` module and dependencies into scope
+1. Bring the `frontmost` module into scope
 ```
+use frontmost::app::FrontmostApp;
 use frontmost::{Detector, start_nsrunloop};
-use objc2::rc::Retained;
-use objc2_foundation::NSString;
 ```
-2. Create the callback function that will be triggered when the user switches to a different application
+2. Define your application struct that will hold state
 ```
-fn handle_app_change(frontmost_app: Retained<NSString>) {
-    println!("Application activated: {}", frontmost_app);
+#[derive(Debug)]
+struct MyApp {
+    frontmost: String,
 }
 ```
-3. Initialize a `Detector` singleton by calling the `init` function and pass your callback function into it
+3. Implement the `FrontmostApp` trait for your struct
+- `set_frontmost(&mut self, new_value: &str)` - Called when app switches, receives app name
+- `update(&self)` - Called after setting, for side effects like logging or triggers
 ```
-Detector::init(handle_app_change);
+impl FrontmostApp for MyApp {
+    fn set_frontmost(&mut self, new_value: &str) {
+        self.frontmost = new_value.to_string();
+    }
+    
+    fn update(&self) {
+        println!("Application activated: {}", self.frontmost);
+    }
+}
 ```
-4. Start the event loop using the `start_nsrunloop!()` macro
+4. Initialize the Detector by passing a boxed instance
+```
+Detector::init(Box::new(my_app));
+```
+5. Start the event loop using the `start_nsrunloop!()` macro
 ```
 start_nsrunloop!();
 ```
 
 ### Complete Example
 ```rust
+use frontmost::app::FrontmostApp;
 use frontmost::{Detector, start_nsrunloop};
-use objc2::rc::Retained;
-use objc2_foundation::NSString;
+
+#[derive(Debug)]
+struct App {
+    frontmost: String,
+}
+
+impl FrontmostApp for App {
+    fn set_frontmost(&mut self, new_value: &str) {
+        self.frontmost = new_value.to_string();
+    }
+    
+    fn update(&self) {
+        println!("Application activated: {}", self.frontmost);
+    }
+}
 
 fn main() {
-    fn handle_app_change(frontmost_app: Retained<NSString>) {
-        println!("Application activated: {}", frontmost_app);
-    }
+    let my_app = App {
+        frontmost: String::new(),
+    };
 
-    Detector::init(handle_app_change);
+    Detector::init(Box::new(my_app));
 
     println!("Monitoring application activations. Press Ctrl+C to stop.");
     start_nsrunloop!();
