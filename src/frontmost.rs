@@ -1,11 +1,12 @@
 use objc2::declare::ClassBuilder;
+use objc2::rc::Retained;
 use objc2::runtime::{NSObject, Sel};
-use objc2::{ClassType, msg_send, sel};
+use objc2::{msg_send, sel, ClassType};
 use objc2_app_kit::{
     NSRunningApplication, NSWorkspace, NSWorkspaceApplicationKey,
     NSWorkspaceDidActivateApplicationNotification,
 };
-use objc2_foundation::NSNotification;
+use objc2_foundation::{NSNotification, NSString};
 
 #[macro_export]
 macro_rules! start_nsrunloop {
@@ -23,8 +24,8 @@ pub struct Detector;
 impl Detector {
     // initialize Detector object with the `init()` function by
     // passing in the callback function that will be triggered upon switching the frontmost app
-    pub fn init(callback: fn(&NSRunningApplication)) {
-        static mut CALLBACK: Option<fn(&NSRunningApplication)> = None;
+    pub fn init(callback: fn(Retained<NSString>)) {
+        static mut CALLBACK: Option<fn(Retained<NSString>)> = None;
         unsafe {
             CALLBACK = Some(callback);
         }
@@ -56,8 +57,11 @@ impl Detector {
                 let ns_running_app: &NSRunningApplication = associated_object
                     .downcast_ref::<NSRunningApplication>()
                     .expect("Failed to downcast ref associated object to an NSRunningApplication");
+                let frontmost_app_name = ns_running_app
+                    .localizedName()
+                    .expect("Failed to capture application localizedName");
                 if let Some(callback) = CALLBACK {
-                    callback(ns_running_app);
+                    callback(frontmost_app_name);
                 }
             }
         }
