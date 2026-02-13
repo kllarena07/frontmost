@@ -61,11 +61,9 @@ impl Detector {
                     .expect("Failed to capture application localizedName");
                 if let Some(app_ref) = APP_INSTANCE.get() {
                     let app_name_str = frontmost_app_name.to_string();
-                    app_ref
-                        .write()
-                        .expect("Failed to write")
-                        .set_frontmost(&app_name_str);
-                    app_ref.read().expect("Failed to read").update();
+                    let mut app = app_ref.write().expect("Failed to write");
+                    app.set_frontmost(&app_name_str);
+                    app.update();
                 }
             }
         }

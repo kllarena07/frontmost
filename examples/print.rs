@@ -9,7 +9,7 @@ impl FrontmostApp for App {
     fn set_frontmost(&mut self, new_value: &str) {
         self.frontmost = new_value.to_string();
     }
-    fn update(&self) {
+    fn update(&mut self) {
         println!("Application activated: {}", self.frontmost);
     }
 }
